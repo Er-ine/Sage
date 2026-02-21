@@ -16,8 +16,8 @@
 
 **Hosted Project Link:** 
 
-https://sage-website-pcos.onrender.com/
-https://sage-chi-dun.vercel.app/
+1) https://sage-website-pcos.onrender.com/
+2) https://sage-chi-dun.vercel.app/
 ---
 
 ## Project Description
