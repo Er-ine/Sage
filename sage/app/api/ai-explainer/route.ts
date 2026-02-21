@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     if (snapshot.empty) {
       return NextResponse.json({ answer: "No answers found in the database." });
-    }
+    }gi
 
     const lowerQuestion = question.toLowerCase();
 
