@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sage 🌿 — PCOS Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #fffdec; font-family: 'Lato', sans-serif; min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+button { font-family: 'Lato', sans-serif; cursor: pointer; border: none; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #fffdec; }
+::-webkit-scrollbar-thumb { background: #86a788; border-radius: 4px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { transform: translateX(-120%) skewX(-12deg); }
+  100% { transform: translateX(380%) skewX(-12deg); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.6; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.fadeUp { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+.shimmer-fx {
+  position: absolute; top: 0; left: 0;
+  width: 35%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── APP SHELL ── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* TOPNAV */
+.topnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 62px;
+  background: rgba(255,253,236,0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #86a78822;
+  position: sticky; top: 0; z-index: 200;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700; color: #5a7d5c;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo-icon {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px #86a78840;
+}
+.nav-center { display: flex; gap: 4px; }
+.nav-btn-link {
+  padding: 8px 16px; border-radius: 50px;
+  font-size: 13px; font-weight: 700; color: #7a9e7e;
+  background: none; border: 1.5px solid transparent;
+  transition: all 0.2s; cursor: pointer;
+}
+.nav-btn-link:hover, .nav-btn-link.active {
+  background: #fff; border-color: #86a78830;
+  color: #5a7d5c; box-shadow: 0 2px 10px #86a78820;
+}
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-icon-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; transition: transform 0.2s;
+  background: #fff; border: 1.5px solid #86a78820;
+  box-shadow: 0 2px 8px #00000008;
+}
+.nav-icon-btn:hover { transform: translateY(-2px); }
+.nav-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg,#86a788,#ffcfcf);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  box-shadow: 0 3px 12px #86a78840;
+}
+
+/* BODY LAYOUT */
+.body-wrap { display: flex; flex: 1; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px; min-height: calc(100vh - 62px);
+  background: #fff; border-right: 1px solid #86a78815;
+  padding: 28px 14px; position: sticky; top: 62px;
+  height: calc(100vh - 62px); overflow-y: auto;
+  flex-shrink: 0;
+}
+.sidebar-section { margin-bottom: 28px; }
+.sidebar-label {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.12em;
+  color: #adc2ae; text-transform: uppercase; padding: 0 12px;
+  margin-bottom: 8px;
+}
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 14px;
+  font-size: 13px; font-weight: 700; color: #7a9e7e;
+  background: none; border: none; width: 100%; text-align: left;
+  transition: all 0.2s; cursor: pointer; margin-bottom: 3px;
+}
+.sidebar-link:hover { background: #f0f7f0; color: #5a7d5c; }
+.sidebar-link.active {
+  background: linear-gradient(135deg,#e8f5e9,#f5fbf5);
+  color: #5a7d5c; border: 1.5px solid #86a78830;
+}
+.sidebar-link .icon { font-size: 18px; width: 22px; text-align: center; }
+
+/* MAIN CONTENT */
+.main { flex: 1; padding: 36px 40px 60px; overflow-x: hidden; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.4s ease both; }
+
+/* ── DASHBOARD ── */
+.hero-row { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-bottom: 28px; }
+
+.hero-card {
+  background: linear-gradient(135deg,#86a788 0%,#9ab89c 40%,#c8a0a8 75%,#ffcfcf 100%);
+  border-radius: 26px; padding: 38px 34px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 10px 48px #86a78838;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.22); border-radius: 50px;
+  padding: 5px 14px; margin-bottom: 14px;
+  font-size: 10px; color: #fff; font-weight: 900; letter-spacing: 0.1em;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px,2.8vw,38px); color: #fff;
+  line-height: 1.2; margin-bottom: 10px;
+  text-shadow: 0 2px 16px rgba(70,100,70,0.25);
+}
+.hero-sub { color: rgba(255,255,255,0.88); font-size: 14px; line-height: 1.65; margin-bottom: 24px; max-width: 300px; }
+.hero-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-stat {
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+  border-radius: 14px; padding: 12px 18px; color: #fff;
+}
+.hero-stat-val { font-size: 20px; font-weight: 900; }
+.hero-stat-lbl { font-size: 10px; opacity: 0.8; margin-top: 3px; letter-spacing: 0.04em; }
+
+.aff-card {
+  background: linear-gradient(135deg,#86a788,#9ab89c 50%,#c8a8b8);
+  border-radius: 26px; padding: 34px 28px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 10px 40px #86a78830;
+}
+.aff-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.22); border-radius: 50px;
+  padding: 5px 14px; margin-bottom: 18px;
+  font-size: 10px; font-weight: 900; color: #fff; letter-spacing: 0.09em;
+}
+.aff-deco {
+  position: absolute; top: -25px; right: 16px;
+  font-size: 130px; color: rgba(255,255,255,0.15);
+  font-family: 'Playfair Display', serif;
+  line-height: 1; pointer-events: none;
+}
+.aff-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(15px,1.5vw,20px); color: #fff;
+  line-height: 1.7; font-style: italic; font-weight: 600;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+.aff-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.aff-author { font-size: 12px; color: rgba(255,255,255,0.7); font-style: italic; }
+.aff-btns { display: flex; gap: 8px; }
+.aff-btn {
+  background: rgba(255,255,255,0.22); border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 50px; padding: 7px 16px; color: #fff;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  transition: background 0.2s;
+}
+.aff-btn:hover { background: rgba(255,255,255,0.35); }
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: #5a7d5c; margin-bottom: 4px;
+}
+.section-sub { color: #adc2ae; font-size: 12px; margin-bottom: 18px; }
+
+.feat-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 26px;
+}
+.feat-card {
+  border-radius: 20px; padding: 22px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative; overflow: hidden;
+  border: 1.5px solid transparent;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+  cursor: pointer;
+}
+.feat-card:hover { transform: translateY(-7px) scale(1.03); box-shadow: 0 12px 36px #00000012; }
+.feat-dot { position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; border-radius: 50%; }
+.feat-icon { font-size: 28px; }
+.feat-name { font-weight: 900; font-size: 13px; line-height: 1.3; }
+.feat-desc { font-size: 11px; opacity: 0.55; }
+
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.white-card {
+  background: #fff; border-radius: 22px; padding: 24px;
+  border: 1.5px solid #86a78815;
+  box-shadow: 0 4px 22px #86a78810;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 700; color: #4a5e4b; margin-bottom: 4px;
+}
+.card-sub { color: #adc2ae; font-size: 12px; margin-bottom: 16px; }
+.log-btns { display: flex; gap: 10px; }
+.log-btn {
+  flex: 1; padding: 14px 8px; border-radius: 14px;
+  font-size: 12px; font-weight: 700; color: #4a5e4b;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: transform 0.2s, filter 0.2s; border: none;
+}
+.log-btn:hover { transform: translateY(-3px); filter: brightness(0.95); }
+.log-btn span { font-size: 26px; }
+
+.streak-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.streak-day { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: #adc2ae; }
+.streak-circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900;
+}
+.insight {
+  background: #f0f7f0; border-radius: 12px; padding: 12px 14px;
+  font-size: 12px; color: #5a7d5c; line-height: 1.6;
+  border: 1.5px solid #86a78820;
+}
+
+/* ── AI EXPLAINER ── */
+.ai-wrap { max-width: 720px; margin: 0 auto; }
+.ai-header { text-align: center; margin-bottom: 32px; }
+.ai-header h2 { font-family:'Playfair Display',serif; font-size:32px; color:#5a7d5c; margin-bottom:8px; }
+.ai-header p { color:#adc2ae; font-size:14px; }
+.chat-box {
+  background: #fff; border-radius: 24px; padding: 24px;
+  border: 1.5px solid #86a78820; box-shadow: 0 4px 24px #86a78810;
+  min-height: 340px; margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.bubble-user {
+  align-self: flex-end;
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; border-radius: 18px 18px 4px 18px;
+  padding: 12px 18px; font-size: 14px; max-width: 75%;
+  line-height: 1.6;
+}
+.bubble-sage {
+  align-self: flex-start;
+  background: linear-gradient(135deg,#fff5f8,#fce4ec);
+  color: #4a3040; border-radius: 18px 18px 18px 4px;
+  padding: 14px 18px; font-size: 14px; max-width: 82%;
+  line-height: 1.7; border: 1.5px solid #f48fb120;
+}
+.bubble-sage strong { color: #5a7d5c; }
+.sage-label {
+  font-size: 11px; font-weight: 900; color: #86a788;
+  margin-bottom: 4px; letter-spacing: 0.08em;
+}
+.ai-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.ai-textarea {
+  flex: 1; background: #fff; border: 1.5px solid #86a78830;
+  border-radius: 18px; padding: 14px 18px; font-family:'Lato',sans-serif;
+  font-size: 14px; color: #3a4a3b; resize: none; min-height: 60px;
+  outline: none; transition: border-color 0.2s; line-height: 1.6;
+}
+.ai-textarea:focus { border-color: #86a788; }
+.ai-textarea::placeholder { color: #bdd0be; }
+.ai-send {
+  width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; font-size: 22px; border: none;
+  box-shadow: 0 4px 16px #86a78840;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.ai-send:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #86a78850; }
+.loading-dots { display: flex; gap: 5px; padding: 4px 0; }
+.loading-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #86a788; animation: pulse 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+.disclaimer {
+  text-align: center; font-size: 11px; color: #bdd0be; margin-top: 12px;
+  line-height: 1.6;
+}
+.quick-prompts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.quick-prompt {
+  background: #f0f7f0; border: 1.5px solid #86a78825;
+  border-radius: 50px; padding: 7px 14px; font-size: 12px;
+  font-weight: 700; color: #5a7d5c; cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-prompt:hover { background: #e0f0e0; border-color: #86a788; }
+
+/* ── INFLAMMATION DIARY ── */
+.diary-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 22px; }
+.form-section { display: flex; flex-direction: column; gap: 16px; }
+.form-card {
+  background: #fff; border-radius: 22px; padding: 24px;
+  border: 1.5px solid #86a78815; box-shadow: 0 4px 22px #86a78810;
+}
+.form-label { font-size: 11px; font-weight: 900; color: #adc2ae; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+.form-input {
+  width: 100%; background: #f8fbf8; border: 1.5px solid #86a78820;
+  border-radius: 12px; padding: 11px 14px; font-family:'Lato',sans-serif;
+  font-size: 13px; color: #3a4a3b; outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: #86a788; }
+.slider-wrap { position: relative; }
+.form-slider {
+  width: 100%; -webkit-appearance: none; height: 6px;
+  border-radius: 4px; outline: none; cursor: pointer;
+}
+.form-slider.stress { background: linear-gradient(90deg,#86a788,#ffcc80,#e57373); }
+.form-slider.sleep { background: linear-gradient(90deg,#e57373,#ffcc80,#86a788); }
+.slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: #adc2ae; margin-top: 5px; font-weight: 700; }
+.form-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff;
+  border: 3px solid #86a788; box-shadow: 0 2px 8px #86a78840; cursor: pointer;
+}
+.submit-btn {
+  width: 100%; padding: 14px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; font-size: 14px; font-weight: 900;
+  box-shadow: 0 4px 18px #86a78838; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s; letter-spacing: 0.04em;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px #86a78848; }
+
+.chart-section { display: flex; flex-direction: column; gap: 16px; }
+.chart-card {
+  background: #fff; border-radius: 22px; padding: 24px;
+  border: 1.5px solid #86a78815; box-shadow: 0 4px 22px #86a78810;
+}
+.chart-area { position: relative; height: 200px; margin: 16px 0 8px; }
+.chart-svg { width: 100%; height: 100%; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; }
+.cal-day {
+  aspect-ratio: 1; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900;
+}
+.cal-header { font-size: 10px; font-weight: 900; color: #adc2ae; text-align: center; padding: 4px 0; }
+.score-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 50px;
+  font-size: 12px; font-weight: 900;
+}
+
+/* ── STORY WALL ── */
+.story-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+.tags-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.tag-pill {
+  padding: 7px 14px; border-radius: 50px; font-size: 12px; font-weight: 700;
+  background: #fff; border: 1.5px solid #86a78825; color: #7a9e7e;
+  cursor: pointer; transition: all 0.2s;
+}
+.tag-pill:hover, .tag-pill.active { background: #86a788; color: #fff; border-color: #86a788; }
+.stories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.story-card {
+  background: #fff; border-radius: 20px; padding: 22px;
+  border: 1.5px solid #86a78815; box-shadow: 0 3px 16px #86a78808;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.story-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px #86a78818; }
+.story-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700;
+}
+.story-text { font-size: 13px; line-height: 1.7; color: #4a5a4c; }
+.story-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.story-author { font-size: 11px; color: #adc2ae; font-weight: 700; }
+.helped-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #f0f7f0; border: 1.5px solid #86a78825;
+  border-radius: 50px; padding: 6px 14px; font-size: 12px;
+  font-weight: 700; color: #5a7d5c; cursor: pointer;
+  transition: all 0.2s;
+}
+.helped-btn:hover { background: #86a788; color: #fff; border-color: #86a788; }
+.write-btn {
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; border: none; border-radius: 50px;
+  padding: 10px 22px; font-size: 13px; font-weight: 900;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px #86a78838;
+}
+.write-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #86a78848; }
+
+/* ── CONNECT ── */
+.connect-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.cysters-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.cyster-card {
+  background: #fff; border-radius: 22px; padding: 24px 20px;
+  border: 1.5px solid #86a78815; box-shadow: 0 3px 16px #86a78808;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.cyster-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px #86a78818; }
+.cyster-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; position: relative;
+}
+.cyster-online {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #86a788; border: 2px solid #fff;
+  position: absolute; bottom: 2px; right: 2px;
+}
+.cyster-name { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:#3a4a3b; }
+.cyster-type { font-size:11px; font-weight:700; color:#adc2ae; margin-top:-8px; }
+.cyster-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+.cyster-tag {
+  font-size: 10px; font-weight: 700; padding: 3px 10px;
+  border-radius: 50px; background: #f0f7f0; color: #5a7d5c;
+}
+.cyster-journey { font-size: 12px; color: #7a9e7e; line-height: 1.5; }
+.wave-btn {
+  width: 100%; padding: 11px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; font-size: 13px; font-weight: 900;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 3px 14px #86a78830;
+}
+.wave-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 22px #86a78845; }
+.wave-btn.waved { background: linear-gradient(135deg,#ffcfcf,#ffe2e2); color: #c0605a; }
+
+/* ── EVENTS ── */
+.events-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1.5px solid #86a78825;
+  border-radius: 50px; padding: 9px 18px;
+  font-size: 13px; color: #adc2ae;
+}
+.search-bar input {
+  border: none; outline: none; font-family:'Lato',sans-serif;
+  font-size: 13px; color: #3a4a3b; background: none; width: 200px;
+}
+.search-bar input::placeholder { color: #bdd0be; }
+.events-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.event-card {
+  background: #fff; border-radius: 20px; padding: 22px;
+  border: 1.5px solid #86a78815; box-shadow: 0 3px 16px #86a78808;
+  display: flex; gap: 16px;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.event-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px #86a78818; }
+.event-date-box {
+  flex-shrink: 0; width: 54px; height: 60px; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+}
+.event-month { font-size: 10px; font-weight: 900; letter-spacing: 0.1em; color: #fff; text-transform: uppercase; }
+.event-day { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
+.event-info { flex: 1; }
+.event-name { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#3a4a3b; margin-bottom:5px; }
+.event-meta { font-size:11px; color:#adc2ae; margin-bottom:8px; line-height:1.6; }
+.event-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 50px; font-size: 10px; font-weight: 700;
+  margin-bottom: 10px;
+}
+.rsvp-btn {
+  padding: 7px 16px; border-radius: 50px; border: none;
+  font-size: 12px; font-weight: 900; cursor: pointer;
+  transition: all 0.2s;
+}
+.rsvp-btn.go {
+  background: linear-gradient(135deg,#86a788,#a8c5aa);
+  color: #fff; box-shadow: 0 3px 12px #86a78830;
+}
+.rsvp-btn.go:hover { transform: translateY(-1px); box-shadow: 0 6px 18px #86a78840; }
+.rsvp-btn.done { background: #f0f7f0; color: #5a7d5c; border: 1.5px solid #86a78825; }
+
+/* FOOTER */
+.footer { text-align:center; padding:28px 0 0; font-size:12px; color:#bdd0be; }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 28px; padding: 36px;
+  max-width: 420px; width: 90%; box-shadow: 0 20px 60px #00000025;
+  animation: fadeUp 0.35s ease both;
+}
+.modal h3 { font-family:'Playfair Display',serif; font-size:22px; color:#3a4a3b; margin-bottom:8px; }
+.modal p { font-size:13px; color:#adc2ae; line-height:1.6; margin-bottom:20px; }
+.modal-btns { display:flex; gap:10px; justify-content:flex-end; }
+.modal-cancel { background:#f0f0f0; color:#666; padding:10px 20px; border-radius:50px; font-size:13px; font-weight:700; border:none; cursor:pointer; }
+.modal-confirm { background:linear-gradient(135deg,#86a788,#a8c5aa); color:#fff; padding:10px 22px; border-radius:50px; font-size:13px; font-weight:700; border:none; cursor:pointer; }
+
+@media (max-width:900px) {
+  .sidebar { display:none; }
+  .feat-grid { grid-template-columns:repeat(2,1fr); }
+  .hero-row, .stories-grid, .cysters-grid, .events-grid, .bottom-row, .diary-grid { grid-template-columns:1fr; }
+  .main { padding:24px 20px 48px; }
+  .topnav { padding:0 20px; }
+  .nav-center { display:none; }
+}
+/* ── PROFILE ── */
+.profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 22px; }
+.profile-sidebar-card {
+  background: #fff; border-radius: 24px; padding: 28px 22px;
+  border: 1.5px solid #86a78815; box-shadow: 0 4px 22px #86a78810;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+}
+.profile-avatar-big {
+  width: 84px; height: 84px; border-radius: 50%;
+  background: linear-gradient(135deg,#86a788,#ffcfcf);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38px; position: relative; box-shadow: 0 6px 24px #86a78840;
+}
+.profile-avatar-edit {
+  position: absolute; bottom: 0; right: 0;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #fff; border: 2px solid #86a78830;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; box-shadow: 0 2px 8px #00000015;
+}
+.profile-name-big { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:#3a4a3b; }
+.profile-city-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #f0f7f0; border-radius: 50px; padding: 5px 14px;
+  font-size: 12px; font-weight: 700; color: #5a7d5c;
+}
+.profile-joined { font-size:11px; color:#adc2ae; font-weight:700; }
+.profile-public-label {
+  width: 100%; background: linear-gradient(135deg,#e8f5e9,#f5fbf5);
+  border: 1.5px solid #86a78825; border-radius: 14px;
+  padding: 12px; font-size: 11px; font-weight: 700; color: #5a7d5c; line-height: 1.6; text-align: left;
+}
+.profile-stats-row { display:flex; gap:8px; width:100%; }
+.profile-stat-box {
+  flex:1; background:#f8fbf8; border-radius:12px; padding:10px 6px;
+  text-align:center; border:1.5px solid #86a78815;
+}
+.profile-stat-val { font-size:18px; font-weight:900; color:#5a7d5c; }
+.profile-stat-lbl { font-size:10px; color:#adc2ae; font-weight:700; margin-top:2px; }
+.profile-main { display:flex; flex-direction:column; gap:16px; }
+.profile-section-card {
+  background:#fff; border-radius:22px; padding:22px;
+  border:1.5px solid #86a78815; box-shadow:0 4px 22px #86a78810;
+}
+.profile-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.profile-section-title {
+  font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#3a4a3b;
+  display:flex; align-items:center; gap:8px;
+}
+.private-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:#fff3e0; border-radius:50px; padding:3px 10px;
+  font-size:10px; font-weight:900; color:#e65100;
+}
+.public-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:#e8f5e9; border-radius:50px; padding:3px 10px;
+  font-size:10px; font-weight:900; color:#2e7d32;
+}
+.edit-section-btn {
+  background:#f0f7f0; border:1.5px solid #86a78825;
+  border-radius:50px; padding:6px 14px; font-size:12px;
+  font-weight:700; color:#5a7d5c; cursor:pointer; transition:all 0.2s;
+}
+.edit-section-btn:hover { background:#86a788; color:#fff; border-color:#86a788; }
+.profile-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.profile-field { display:flex; flex-direction:column; gap:4px; }
+.profile-field-label { font-size:10px; font-weight:900; color:#adc2ae; letter-spacing:0.1em; text-transform:uppercase; }
+.profile-field-value { font-size:13px; font-weight:700; color:#3a4a3b; }
+.symptom-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.symptom-tag { background:#f0f7f0; border:1.5px solid #86a78825; border-radius:50px; padding:5px 12px; font-size:12px; font-weight:700; color:#5a7d5c; }
+.med-tag { background:#fce4ec; border:1.5px solid #f48fb125; border-radius:50px; padding:5px 12px; font-size:12px; font-weight:700; color:#880e4f; }
+.privacy-note {
+  display:flex; align-items:flex-start; gap:10px;
+  background:linear-gradient(135deg,#fff8e1,#fffdf5);
+  border:1.5px solid #ffe08250; border-radius:12px;
+  padding:12px; font-size:12px; color:#7a6020; line-height:1.6; margin-top:12px;
+}
+@media (max-width:900px) { .profile-layout { grid-template-columns:1fr; } .profile-field-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C8.5 2 6 5.5 6 9c0 2.5 1.2 4.7 3 6V18h6v-3c1.8-1.3 3-3.5 3-6 0-3.5-2.5-7-6-7z" fill="white" opacity=".95"/>
+        <path d="M9 21h6" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    Sage
+  </div>
+  <div class="nav-center">
+    <button class="nav-btn-link active" onclick="navigate('dashboard')">🏠 Home</button>
+    <button class="nav-btn-link" onclick="navigate('ai')">✨ AI Explainer</button>
+    <button class="nav-btn-link" onclick="navigate('diary')">🔥 Diary</button>
+    <button class="nav-btn-link" onclick="navigate('stories')">💬 Stories</button>
+    <button class="nav-btn-link" onclick="navigate('connect')">👭 Connect</button>
+    <button class="nav-btn-link" onclick="navigate('events')">📅 Events</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-icon-btn">🔔</button>
+    <div class="nav-avatar">🌸</div>
+  </div>
+</nav>
+
+<div class="body-wrap">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <button class="sidebar-link active" onclick="navigate('dashboard')"><span class="icon">🏠</span> Dashboard</button>
+    <button class="sidebar-link" onclick="navigate('ai')"><span class="icon">✨</span> AI Explainer</button>
+    <button class="sidebar-link" onclick="navigate('diary')"><span class="icon">🔥</span> Inflammation Diary</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Community</div>
+    <button class="sidebar-link" onclick="navigate('stories')"><span class="icon">💬</span> Story Wall</button>
+    <button class="sidebar-link" onclick="navigate('connect')"><span class="icon">👭</span> Connect with Cysters</button>
+    <button class="sidebar-link" onclick="navigate('events')"><span class="icon">📅</span> Events Board</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">You</div>
+    <button class="sidebar-link" onclick="navigate('profile')"><span class="icon">👤</span> My Profile</button>
+    <button class="sidebar-link"><span class="icon">⚙️</span> Settings</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div id="page-dashboard" class="page active">
+
+    <div class="hero-row fadeUp">
+      <div class="hero-card">
+        <div class="shimmer-fx"></div>
+        <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none;"></div>
+        <div class="hero-badge">✦ YOUR WELLNESS SPACE ✦</div>
+        <h1 class="hero-title" id="greeting">Good morning, lovely 🌿</h1>
+        <p class="hero-sub">You're not alone on this journey. Let's take care of you, one day at a time.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-val">7 🔥</div><div class="hero-stat-lbl">Day Streak</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">12 📓</div><div class="hero-stat-lbl">Diary Entries</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">3 💚</div><div class="hero-stat-lbl">Cysters</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">68</div><div class="hero-stat-lbl">Inflam. Score</div></div>
+        </div>
+      </div>
+      <div class="aff-card" id="aff-card">
+        <div class="shimmer-fx"></div>
+        <div class="aff-deco">"</div>
+        <div class="aff-tag">🌷 TODAY'S AFFIRMATION</div>
+        <p class="aff-text" id="aff-text">"Your body is doing its best, and so are you. Healing isn't linear — and that's okay."</p>
+        <div class="aff-footer">
+          <span class="aff-author">— For the hard days</span>
+          <div class="aff-btns">
+            <button class="aff-btn">💾 Save</button>
+            <button class="aff-btn" onclick="newAff()">🔀 New</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">What would you like to do today?</p>
+    <p class="section-sub">Your tools for understanding & healing 🌱</p>
+
+    <div class="feat-grid">
+      <div class="feat-card" style="background:linear-gradient(135deg,#fce4ec,#fff5f8);border-color:#f48fb125;" onclick="navigate('profile')">
+        <div class="feat-dot" style="background:#f48fb1;"></div>
+        <div class="feat-icon">👤</div>
+        <div><div class="feat-name" style="color:#880e4f;">My Profile</div><div class="feat-desc" style="color:#880e4f;">Your journey →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#fce4ec,#fff5f8);border-color:#f48fb125;" onclick="navigate('ai')">
+        <div class="feat-dot" style="background:#f48fb1;"></div>
+        <div class="feat-icon">🤖</div>
+        <div><div class="feat-name" style="color:#880e4f;">AI Explainer</div><div class="feat-desc" style="color:#880e4f;">Ask anything →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#fff3e0,#fffaf5);border-color:#ffcc8025;" onclick="navigate('diary')">
+        <div class="feat-dot" style="background:#ffcc80;"></div>
+        <div class="feat-icon">🔥</div>
+        <div><div class="feat-name" style="color:#bf360c;">Inflammation Diary</div><div class="feat-desc" style="color:#bf360c;">Track patterns →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#f3e5f5,#faf5fc);border-color:#ce93d825;" onclick="navigate('stories')">
+        <div class="feat-dot" style="background:#ce93d8;"></div>
+        <div class="feat-icon">📖</div>
+        <div><div class="feat-name" style="color:#4a148c;">Story Wall</div><div class="feat-desc" style="color:#4a148c;">Real stories →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#e3f2fd,#f5faff);border-color:#90caf925;" onclick="navigate('connect')">
+        <div class="feat-dot" style="background:#90caf9;"></div>
+        <div class="feat-icon">👭</div>
+        <div><div class="feat-name" style="color:#0d47a1;">Connect</div><div class="feat-desc" style="color:#0d47a1;">Find your people →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#e8f5e9,#f5fbf5);border-color:#a5d6a725;" onclick="navigate('events')">
+        <div class="feat-dot" style="background:#a5d6a7;"></div>
+        <div class="feat-icon">📅</div>
+        <div><div class="feat-name" style="color:#1b5e20;">Events Board</div><div class="feat-desc" style="color:#1b5e20;">Join community →</div></div>
+      </div>
+      <div class="feat-card" style="background:linear-gradient(135deg,#86a788,#a8c5aa);border:none;justify-content:center;align-items:center;text-align:center;">
+        <div class="shimmer-fx"></div>
+        <div style="font-size:30px;animation:float 3s ease-in-out infinite;">🌷</div>
+        <div style="font-family:'Playfair Display',serif;color:#fff;font-size:13px;font-style:italic;line-height:1.5;">"You've got this, Cyster."</div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="white-card">
+        <div class="card-title">Quick log for today 📋</div>
+        <div class="card-sub">Track how you're feeling right now</div>
+        <div class="log-btns">
+          <button class="log-btn" style="background:linear-gradient(135deg,#ffe2e2,#ffcfcf);" onclick="navigate('diary')"><span>😊</span>Mood</button>
+          <button class="log-btn" style="background:linear-gradient(135deg,#e8f5e9,#c8e6ca);" onclick="navigate('diary')"><span>🥗</span>Food</button>
+          <button class="log-btn" style="background:linear-gradient(135deg,#e8eeff,#d0d8ff);" onclick="navigate('diary')"><span>😴</span>Sleep</button>
+          <button class="log-btn" style="background:linear-gradient(135deg,#fff3e0,#ffe0c0);" onclick="navigate('diary')"><span>💊</span>Meds</button>
+        </div>
+      </div>
+      <div class="white-card" style="background:linear-gradient(135deg,#fffdec,#ffe2e2);border-color:#ffe2e2;">
+        <div class="card-title">Your week at a glance 🌿</div>
+        <div class="card-sub">Keep logging to see patterns emerge</div>
+        <div class="streak-row">
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">M</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">T</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">W</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">T</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">F</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#86a788;color:#fff;">S</div><span style="color:#86a788;">✓</span></div>
+          <div class="streak-day"><div class="streak-circle" style="background:#ffe2e2;color:#adc2ae;">S</div><span>—</span></div>
+        </div>
+        <div class="insight">🔥 6-day streak! Your inflammation score dropped 12 points this week. Keep going!</div>
+      </div>
+    </div>
+
+    <div class="footer">Made with 💚 for every Cyster on this journey &nbsp;·&nbsp; Sage © 2025</div>
+  </div>
+
+  <!-- ── AI EXPLAINER ── -->
+  <div id="page-ai" class="page">
+    <div class="ai-wrap">
+      <div class="ai-header">
+        <h2>✨ AI Symptom Explainer</h2>
+        <p>Like texting a doctor friend at 2am — warm, informed, never alarming.</p>
+      </div>
+
+      <div class="quick-prompts">
+        <button class="quick-prompt" onclick="fillPrompt('Why is my hair falling out so much lately?')">💇 Hair loss</button>
+        <button class="quick-prompt" onclick="fillPrompt('I missed my period for 2 months, is that normal with PCOS?')">📅 Missed period</button>
+        <button class="quick-prompt" onclick="fillPrompt('I feel really bloated and my skin is breaking out badly')">😣 Bloating & acne</button>
+        <button class="quick-prompt" onclick="fillPrompt('I have been really anxious and crying a lot — is that PCOS related?')">🧠 Mood & anxiety</button>
+        <button class="quick-prompt" onclick="fillPrompt('My doctor wants to put me on Metformin. What does that actually do?')">💊 Metformin</button>
+      </div>
+
+      <div class="chat-box" id="chat-box">
+        <div>
+          <div class="sage-label">SAGE AI</div>
+          <div class="bubble-sage">Hey lovely 🌿 I'm here to help you understand what's happening in your body. Type your symptoms in plain language — no medical terms needed. I'll explain what might be going on and give you some genuinely useful things to try.</div>
+        </div>
+      </div>
+
+      <div class="ai-input-row">
+        <textarea class="ai-textarea" id="ai-input" placeholder="Tell me how you're feeling today... e.g. 'I feel so tired and bloated and my skin is breaking out'" rows="2"></textarea>
+        <button class="ai-send" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="disclaimer">This is not a medical diagnosis. If your symptoms are severe or persistent, please see a doctor. You deserve to be taken seriously. 💚</div>
+    </div>
+  </div>
+
+  <!-- ── INFLAMMATION DIARY ── -->
+  <div id="page-diary" class="page">
+    <p class="section-title">🔥 Inflammation Diary</p>
+    <p class="section-sub">Make the invisible visible — log daily to find your personal triggers</p>
+
+    <div class="diary-grid">
+      <div class="form-section">
+        <div class="form-card">
+          <div class="card-title">Log Today</div>
+          <div class="card-sub" id="today-date"></div>
+
+          <label class="form-label">🥗 What did you eat today?</label>
+          <textarea class="form-input" rows="3" placeholder="e.g. oats for breakfast, salad for lunch, pasta for dinner..."></textarea>
+
+          <label class="form-label" style="margin-top:16px;">😴 Sleep quality</label>
+          <input type="range" class="form-slider sleep" min="1" max="10" value="6" id="sleep-slider" oninput="updateSlider('sleep')"/>
+          <div class="slider-labels"><span>Poor 😞</span><span id="sleep-val">6/10</span><span>Great 😊</span></div>
+
+          <label class="form-label" style="margin-top:16px;">😤 Stress level</label>
+          <input type="range" class="form-slider stress" min="1" max="10" value="4" id="stress-slider" oninput="updateSlider('stress')"/>
+          <div class="slider-labels"><span>Calm 😌</span><span id="stress-val">4/10</span><span>Very stressed 😰</span></div>
+
+          <label class="form-label" style="margin-top:16px;">💬 How does your body feel?</label>
+          <textarea class="form-input" rows="3" placeholder="e.g. bloated, headache, skin feels inflamed, low energy..."></textarea>
+
+          <button class="submit-btn" style="margin-top:20px;" onclick="submitLog()">Save Today's Log 🌿</button>
+        </div>
+
+        <div class="form-card">
+          <div class="card-title">Today's Score</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:10px;">
+            <div style="font-size:48px;font-weight:900;color:#86a788;">68</div>
+            <div>
+              <span class="score-badge" style="background:#fff3e0;color:#e65100;">⚡ Moderate</span>
+              <div style="font-size:12px;color:#adc2ae;margin-top:6px;line-height:1.6;">Down 12 points from last week. Your anti-inflammatory choices are working!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-card">
+          <div class="card-title">Inflammation Trend</div>
+          <div class="card-sub">Last 14 days</div>
+          <div class="chart-area">
+            <svg class="chart-svg" viewBox="0 0 500 180" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#86a788" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#86a788" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,120 C30,100 60,140 90,110 C120,80 150,130 180,100 C210,70 240,120 270,90 C300,60 330,100 360,75 C390,50 420,80 450,60 C470,48 490,52 500,50 L500,180 L0,180 Z" fill="url(#chartGrad)"/>
+              <path d="M0,120 C30,100 60,140 90,110 C120,80 150,130 180,100 C210,70 240,120 270,90 C300,60 330,100 360,75 C390,50 420,80 450,60 C470,48 490,52 500,50" stroke="#86a788" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <circle cx="500" cy="50" r="5" fill="#86a788"/>
+            </svg>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#adc2ae;font-weight:700;">
+            <span>14 days ago</span><span>7 days ago</span><span>Today</span>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="card-title">February Calendar</div>
+          <div class="card-sub">Color = inflammation level</div>
+          <div style="margin-top:12px;">
+            <div class="cal-grid">
+              <div class="cal-header">M</div><div class="cal-header">T</div><div class="cal-header">W</div>
+              <div class="cal-header">T</div><div class="cal-header">F</div><div class="cal-header">S</div><div class="cal-header">S</div>
+            </div>
+            <div class="cal-grid" style="margin-top:5px;" id="cal-grid"></div>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#adc2ae;font-weight:700;"><span style="width:12px;height:12px;border-radius:3px;background:#c8e6c9;display:inline-block;"></span>Low</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#adc2ae;font-weight:700;"><span style="width:12px;height:12px;border-radius:3px;background:#ffe082;display:inline-block;"></span>Moderate</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#adc2ae;font-weight:700;"><span style="width:12px;height:12px;border-radius:3px;background:#ffab91;display:inline-block;"></span>High</span>
+          </div>
+        </div>
+
+        <div class="white-card">
+          <div class="card-title">🔍 Your Top Triggers</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:18px;">😤</span>
+              <div style="flex:1;">
+                <div style="font-weight:700;color:#3a4a3b;">Work stress on Sunday nights</div>
+                <div style="font-size:11px;color:#adc2ae;">Spikes score by avg. +18 pts</div>
+              </div>
+              <span style="font-size:11px;font-weight:900;color:#e57373;background:#fce4ec;padding:3px 10px;border-radius:50px;">High</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:18px;">🍞</span>
+              <div style="flex:1;">
+                <div style="font-weight:700;color:#3a4a3b;">Refined carbs</div>
+                <div style="font-size:11px;color:#adc2ae;">Spikes score by avg. +12 pts</div>
+              </div>
+              <span style="font-size:11px;font-weight:900;color:#f57c00;background:#fff3e0;padding:3px 10px;border-radius:50px;">Med</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:18px;">😴</span>
+              <div style="flex:1;">
+                <div style="font-weight:700;color:#3a4a3b;">Less than 6hrs sleep</div>
+                <div style="font-size:11px;color:#adc2ae;">Spikes score by avg. +9 pts</div>
+              </div>
+              <span style="font-size:11px;font-weight:900;color:#f57c00;background:#fff3e0;padding:3px 10px;border-radius:50px;">Med</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STORY WALL ── -->
+  <div id="page-stories" class="page">
+    <div class="story-header">
+      <div>
+        <p class="section-title">💬 Story Wall</p>
+        <p class="section-sub">Real stories. Real women. No filters.</p>
+      </div>
+      <button class="write-btn" onclick="document.getElementById('write-modal').classList.add('open')">✍️ Share your story</button>
+    </div>
+
+    <div class="tags-row">
+      <button class="tag-pill active" onclick="filterTag(this)">All</button>
+      <button class="tag-pill" onclick="filterTag(this)">🆕 Newly Diagnosed</button>
+      <button class="tag-pill" onclick="filterTag(this)">😤 Doctor Dismissed Me</button>
+      <button class="tag-pill" onclick="filterTag(this)">💇 Hair Loss</button>
+      <button class="tag-pill" onclick="filterTag(this)">✨ Small Win</button>
+      <button class="tag-pill" onclick="filterTag(this)">💔 Hard Day</button>
+      <button class="tag-pill" onclick="filterTag(this)">🎉 Success Story</button>
+      <button class="tag-pill" onclick="filterTag(this)">🧠 Mental Health</button>
+      <button class="tag-pill" onclick="filterTag(this)">💊 Medication</button>
+    </div>
+
+    <div class="stories-grid">
+      <div class="story-card">
+        <span class="story-tag" style="background:#e8f5e9;color:#2e7d32;">🆕 Newly Diagnosed</span>
+        <p class="story-text">"I was diagnosed 3 weeks ago and I felt like my world fell apart. Finding this community made me realise I'm not going through this alone. Thank you all for being here."</p>
+        <div class="story-footer">
+          <span class="story-author">Anonymous Cyster · 2 days ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>24</span></button>
+        </div>
+      </div>
+      <div class="story-card">
+        <span class="story-tag" style="background:#fce4ec;color:#c2185b;">😤 Doctor Dismissed Me</span>
+        <p class="story-text">"My third doctor finally listened. Three years of being told 'your periods are just irregular' and finally someone ran the right tests. Don't give up advocating for yourself."</p>
+        <div class="story-footer">
+          <span class="story-author">Priya K. · 5 days ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>61</span></button>
+        </div>
+      </div>
+      <div class="story-card">
+        <span class="story-tag" style="background:#fff3e0;color:#e65100;">✨ Small Win</span>
+        <p class="story-text">"Two months of logging my inflammation diary and I finally identified my trigger — Sunday night anxiety. I've started a Sunday wind-down routine and my score dropped 15 points this week!"</p>
+        <div class="story-footer">
+          <span class="story-author">Maya R. · 1 week ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>47</span></button>
+        </div>
+      </div>
+      <div class="story-card">
+        <span class="story-tag" style="background:#f3e5f5;color:#7b1fa2;">🧠 Mental Health</span>
+        <p class="story-text">"Nobody talks about the mental health side of PCOS enough. The anxiety, the mood swings, the crying for no reason — it's all connected and it's all real. You're not 'just being emotional'."</p>
+        <div class="story-footer">
+          <span class="story-author">Anonymous Cyster · 1 week ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>89</span></button>
+        </div>
+      </div>
+      <div class="story-card">
+        <span class="story-tag" style="background:#e3f2fd;color:#1565c0;">🎉 Success Story</span>
+        <p class="story-text">"After 2 years on metformin and changing my diet, my periods are regular for the first time in my life. I cried when I saw it happen. There is hope on the other side of this."</p>
+        <div class="story-footer">
+          <span class="story-author">Leila A. · 2 weeks ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>112</span></button>
+        </div>
+      </div>
+      <div class="story-card">
+        <span class="story-tag" style="background:#fff8e1;color:#f57f17;">💇 Hair Loss</span>
+        <p class="story-text">"The hair loss hit me hardest. I found a derm who specialises in hormonal hair loss and she's been a game changer. Spironolactone + scalp massages + reducing stress. Still on the journey but improving."</p>
+        <div class="story-footer">
+          <span class="story-author">Zara M. · 3 weeks ago</span>
+          <button class="helped-btn" onclick="helpedClick(this)">💚 This helped me <span>38</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONNECT ── -->
+  <div id="page-connect" class="page">
+    <div class="connect-header">
+      <div>
+        <p class="section-title">👭 Connect with Cysters</p>
+        <p class="section-sub">Find women who get it — without you having to explain it</p>
+      </div>
+      <button class="write-btn">✏️ Edit My Profile</button>
+    </div>
+
+    <div class="cysters-grid">
+      <div class="cyster-card">
+        <div class="cyster-avatar" style="background:linear-gradient(135deg,#fce4ec,#f8bbd9);">
+          🌸
+          <div class="cyster-online"></div>
+        </div>
+        <div>
+          <div class="cyster-name">Priya K.</div>
+          <div class="cyster-type">Insulin-resistant PCOS · 3yr journey</div>
+        </div>
+        <div class="cyster-tags">
+          <span class="cyster-tag">Hair Loss</span>
+          <span class="cyster-tag">Metformin</span>
+          <span class="cyster-tag">Fertility</span>
+        </div>
+        <p class="cyster-journey">"Learning to work with my body, not against it. Here if anyone needs to talk."</p>
+        <button class="wave-btn" onclick="waveClick(this)">👋 Send a Wave</button>
+      </div>
+      <div class="cyster-card">
+        <div class="cyster-avatar" style="background:linear-gradient(135deg,#e8f5e9,#c8e6ca);">
+          🌿
+          <div class="cyster-online"></div>
+        </div>
+        <div>
+          <div class="cyster-name">Maya R.</div>
+          <div class="cyster-type">Inflammatory PCOS · 2yr journey</div>
+        </div>
+        <div class="cyster-tags">
+          <span class="cyster-tag">Anxiety</span>
+          <span class="cyster-tag">Diet</span>
+          <span class="cyster-tag">Small wins</span>
+        </div>
+        <p class="cyster-journey">"Inflammation diary changed my life. Happy to help anyone starting out with it!"</p>
+        <button class="wave-btn" onclick="waveClick(this)">👋 Send a Wave</button>
+      </div>
+      <div class="cyster-card">
+        <div class="cyster-avatar" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb);">
+          💙
+        </div>
+        <div>
+          <div class="cyster-name">Leila A.</div>
+          <div class="cyster-type">Adrenal PCOS · 5yr journey</div>
+        </div>
+        <div class="cyster-tags">
+          <span class="cyster-tag">Success story</span>
+          <span class="cyster-tag">Cycle regulation</span>
+        </div>
+        <p class="cyster-journey">"5 years in and finally feeling like myself again. Reach out anytime."</p>
+        <button class="wave-btn" onclick="waveClick(this)">👋 Send a Wave</button>
+      </div>
+      <div class="cyster-card">
+        <div class="cyster-avatar" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);">
+          🌼
+          <div class="cyster-online"></div>
+        </div>
+        <div>
+          <div class="cyster-name">Anika S.</div>
+          <div class="cyster-type">Post-pill PCOS · 1yr journey</div>
+        </div>
+        <div class="cyster-tags">
+          <span class="cyster-tag">Newly diagnosed</span>
+          <span class="cyster-tag">Acne</span>
+          <span class="cyster-tag">Weight</span>
+        </div>
+        <p class="cyster-journey">"Still figuring it all out. Looking for others who are early in their journey too."</p>
+        <button class="wave-btn" onclick="waveClick(this)">👋 Send a Wave</button>
+      </div>
+      <div class="cyster-card">
+        <div class="cyster-avatar" style="background:linear-gradient(135deg,#f3e5f5,#e1bee7);">
+          💜
+        </div>
+        <div>
+          <div class="cyster-name">Zara M.</div>
+          <div class="cyster-type">Inflammatory PCOS · 4yr journey</div>
+        </div>
+        <div class="cyster-tags">
+          <span class="cyster-tag">Hair Loss</span>
+          <span class="cyster-tag">Spiro</span>
+          <span class="cyster-tag">Mental health</span>
+        </div>
+        <p class="cyster-journey">"The mental health side is real. Let's normalise talking about it more."</p>
+        <button class="wave-btn" onclick="waveClick(this)">👋 Send a Wave</button>
+      </div>
+      <div class="cyster-card" style="background:linear-gradient(135deg,#86a788,#a8c5aa);border:none;">
+        <div style="font-size:36px;animation:float 3s ease-in-out infinite;">🌷</div>
+        <div style="font-family:'Playfair Display',serif;color:#fff;font-size:15px;font-style:italic;text-align:center;line-height:1.6;">"You are not alone in this. There are women right here who get it."</div>
+        <button class="wave-btn" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.4);">Complete your profile →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EVENTS ── -->
+  <div id="page-events" class="page">
+    <div class="events-top">
+      <div>
+        <p class="section-title">📅 Events Board</p>
+        <p class="section-sub">Find your people in real life too</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Search events or city..."/>
+        </div>
+        <button class="write-btn">+ Host an Event</button>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <button class="tag-pill active" onclick="filterTag(this)">All</button>
+      <button class="tag-pill" onclick="filterTag(this)">🖥️ Online</button>
+      <button class="tag-pill" onclick="filterTag(this)">📍 In-Person</button>
+      <button class="tag-pill" onclick="filterTag(this)">🩺 Doctor Q&A</button>
+      <button class="tag-pill" onclick="filterTag(this)">🍳 Cooking</button>
+      <button class="tag-pill" onclick="filterTag(this)">🧘 Wellness</button>
+      <button class="tag-pill" onclick="filterTag(this)">🎗️ Awareness</button>
+    </div>
+
+    <div class="events-grid">
+      <div class="event-card">
+        <div class="event-date-box" style="background:linear-gradient(135deg,#86a788,#a8c5aa);">
+          <div class="event-month">MAR</div>
+          <div class="event-day">08</div>
+        </div>
+        <div class="event-info">
+          <div class="event-name">PCOS & Insulin Resistance: Ask a Doctor</div>
+          <div class="event-meta">🖥️ Online · 7:00 PM IST · Dr. Meera Nair</div>
+          <span class="event-tag" style="background:#e8f5e9;color:#2e7d32;">🩺 Doctor Q&A ✓ Verified</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <button class="rsvp-btn go" onclick="rsvpClick(this)">RSVP Free →</button>
+            <span style="font-size:11px;color:#adc2ae;">142 attending</span>
+          </div>
+        </div>
+      </div>
+      <div class="event-card">
+        <div class="event-date-box" style="background:linear-gradient(135deg,#ce93d8,#ba68c8);">
+          <div class="event-month">MAR</div>
+          <div class="event-day">14</div>
+        </div>
+        <div class="event-info">
+          <div class="event-name">Anti-Inflammatory Cooking Workshop</div>
+          <div class="event-meta">📍 Mumbai, India · 3:00 PM · Nutritionist led</div>
+          <span class="event-tag" style="background:#f3e5f5;color:#7b1fa2;">🍳 Cooking</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <button class="rsvp-btn go" onclick="rsvpClick(this)">RSVP ₹299 →</button>
+            <span style="font-size:11px;color:#adc2ae;">28 attending</span>
+          </div>
+        </div>
+      </div>
+      <div class="event-card">
+        <div class="event-date-box" style="background:linear-gradient(135deg,#ffb74d,#ffa726);">
+          <div class="event-month">MAR</div>
+          <div class="event-day">21</div>
+        </div>
+        <div class="event-info">
+          <div class="event-name">PCOS Support Circle — Monthly Meetup</div>
+          <div class="event-meta">🖥️ Online · 6:00 PM IST · Community hosted</div>
+          <span class="event-tag" style="background:#fff3e0;color:#e65100;">🧘 Wellness</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <button class="rsvp-btn go" onclick="rsvpClick(this)">RSVP Free →</button>
+            <span style="font-size:11px;color:#adc2ae;">67 attending</span>
+          </div>
+        </div>
+      </div>
+      <div class="event-card">
+        <div class="event-date-box" style="background:linear-gradient(135deg,#f48fb1,#f06292);">
+          <div class="event-month">APR</div>
+          <div class="event-day">03</div>
+        </div>
+        <div class="event-info">
+          <div class="event-name">PCOS Awareness Walk — Bangalore</div>
+          <div class="event-meta">📍 Cubbon Park, Bangalore · 7:00 AM</div>
+          <span class="event-tag" style="background:#fce4ec;color:#c2185b;">🎗️ Awareness</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <button class="rsvp-btn go" onclick="rsvpClick(this)">Join the Walk →</button>
+            <span style="font-size:11px;color:#adc2ae;">203 attending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MY PROFILE ── -->
+  <div id="page-profile" class="page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <p class="section-title">👤 My Profile</p>
+        <p class="section-sub">Your personal space — only you can see the private details</p>
+      </div>
+      <button class="write-btn" onclick="document.getElementById('edit-profile-modal').classList.add('open')">✏️ Edit Profile</button>
+    </div>
+
+    <div class="profile-layout">
+      <!-- LEFT -->
+      <div>
+        <div class="profile-sidebar-card">
+          <div class="profile-avatar-big">🌸<div class="profile-avatar-edit">✏️</div></div>
+          <div class="profile-name-big" id="prof-name">Ananya Krishnan</div>
+          <div class="profile-city-tag" id="prof-city">📍 Kochi, Kerala</div>
+          <div class="profile-joined">Member since January 2025 · 7 🔥 streak</div>
+          <div class="profile-public-label">🌍 <strong>Visible to everyone:</strong> Your username and city are public so other Cysters can find and connect with you.</div>
+          <div class="profile-stats-row">
+            <div class="profile-stat-box"><div class="profile-stat-val">12</div><div class="profile-stat-lbl">Diary Logs</div></div>
+            <div class="profile-stat-box"><div class="profile-stat-val">3</div><div class="profile-stat-lbl">Cysters</div></div>
+            <div class="profile-stat-box"><div class="profile-stat-val">2</div><div class="profile-stat-lbl">Stories</div></div>
+          </div>
+          <button class="wave-btn" style="width:100%;" onclick="navigate('connect')">👭 Find Cysters Near Me</button>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="profile-main">
+
+        <!-- PUBLIC -->
+        <div class="profile-section-card">
+          <div class="profile-section-header">
+            <div class="profile-section-title">🌍 Public Information <span class="public-badge">🔓 Visible to all</span></div>
+            <button class="edit-section-btn" onclick="document.getElementById('edit-profile-modal').classList.add('open')">Edit</button>
+          </div>
+          <div class="profile-field-grid">
+            <div class="profile-field"><div class="profile-field-label">Username</div><div class="profile-field-value" id="field-username">Ananya Krishnan</div></div>
+            <div class="profile-field"><div class="profile-field-label">City</div><div class="profile-field-value" id="field-city">Kochi, Kerala</div></div>
+            <div class="profile-field"><div class="profile-field-label">PCOS Type</div><div class="profile-field-value" id="field-pcos-type">Insulin-resistant PCOS</div></div>
+            <div class="profile-field"><div class="profile-field-label">Journey Stage</div><div class="profile-field-value" id="field-journey">Early — figuring things out</div></div>
+          </div>
+          <div class="privacy-note"><span style="font-size:16px;">ℹ️</span><span>Your username and city help Cysters find you. PCOS type and journey stage help match you with similar women.</span></div>
+        </div>
+
+        <!-- PRIVATE -->
+        <div class="profile-section-card">
+          <div class="profile-section-header">
+            <div class="profile-section-title">🔒 Private Health Details <span class="private-badge">🔒 Only you</span></div>
+            <button class="edit-section-btn" onclick="document.getElementById('edit-profile-modal').classList.add('open')">Edit</button>
+          </div>
+          <div class="profile-field-grid">
+            <div class="profile-field"><div class="profile-field-label">Date of Birth</div><div class="profile-field-value">12 March 1998</div></div>
+            <div class="profile-field"><div class="profile-field-label">Diagnosed On</div><div class="profile-field-value">August 2022</div></div>
+            <div class="profile-field"><div class="profile-field-label">Cycle Length</div><div class="profile-field-value">35–45 days (irregular)</div></div>
+            <div class="profile-field"><div class="profile-field-label">BMI (last recorded)</div><div class="profile-field-value">26.4</div></div>
+            <div class="profile-field"><div class="profile-field-label">Doctor / Gynaecologist</div><div class="profile-field-value">Dr. Anjali Menon, Kochi</div></div>
+            <div class="profile-field"><div class="profile-field-label">Fertility Goals</div><div class="profile-field-value">Considering in 2–3 years</div></div>
+          </div>
+          <div style="margin-top:16px;"><div class="profile-field-label" style="margin-bottom:8px;">Main Symptoms</div>
+            <div class="symptom-tags">
+              <span class="symptom-tag">🧖 Acne</span><span class="symptom-tag">💇 Hair thinning</span>
+              <span class="symptom-tag">😴 Fatigue</span><span class="symptom-tag">⚖️ Weight gain</span>
+              <span class="symptom-tag">😤 Anxiety</span><span class="symptom-tag">🌊 Bloating</span>
+            </div>
+          </div>
+          <div style="margin-top:14px;"><div class="profile-field-label" style="margin-bottom:8px;">Current Medications / Supplements</div>
+            <div class="symptom-tags">
+              <span class="med-tag">💊 Metformin 500mg</span><span class="med-tag">🌿 Inositol</span>
+              <span class="med-tag">☀️ Vitamin D3</span><span class="med-tag">🐟 Omega-3</span>
+            </div>
+          </div>
+          <div style="margin-top:14px;"><div class="profile-field-label" style="margin-bottom:6px;">Personal Notes</div>
+            <div style="background:#f8fbf8;border:1.5px solid #86a78820;border-radius:12px;padding:14px;font-size:13px;color:#4a5a4c;line-height:1.7;">Diagnosed after years of irregular periods. Currently focused on reducing inflammation through diet and stress management. Biggest triggers: refined sugar and lack of sleep.</div>
+          </div>
+          <div class="privacy-note"><span style="font-size:16px;">🔒</span><span>Everything here is <strong>completely private</strong> — never shared with other Cysters, Sage, or anyone else.</span></div>
+        </div>
+
+        <!-- JOURNEY TIMELINE -->
+        <div class="profile-section-card">
+          <div class="profile-section-header">
+            <div class="profile-section-title">🌱 My PCOS Journey</div>
+            <span class="private-badge">🔒 Only you</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="display:flex;gap:14px;">
+              <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:11px;height:11px;border-radius:50%;background:#86a788;margin-top:4px;flex-shrink:0;"></div><div style="width:2px;flex:1;background:#86a78828;min-height:34px;"></div></div>
+              <div style="padding-bottom:18px;"><div style="font-size:10px;font-weight:900;color:#adc2ae;letter-spacing:0.08em;">AUGUST 2022</div><div style="font-size:13px;font-weight:700;color:#3a4a3b;margin-top:2px;">Finally diagnosed with PCOS</div><div style="font-size:12px;color:#7a9e7e;margin-top:3px;line-height:1.5;">After 3 years of irregular cycles and being dismissed, got a proper diagnosis with ultrasound + bloodwork.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;">
+              <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:11px;height:11px;border-radius:50%;background:#ffb74d;margin-top:4px;flex-shrink:0;"></div><div style="width:2px;flex:1;background:#86a78828;min-height:34px;"></div></div>
+              <div style="padding-bottom:18px;"><div style="font-size:10px;font-weight:900;color:#adc2ae;letter-spacing:0.08em;">JANUARY 2023</div><div style="font-size:13px;font-weight:700;color:#3a4a3b;margin-top:2px;">Started Metformin</div><div style="font-size:12px;color:#7a9e7e;margin-top:3px;line-height:1.5;">Began 500mg daily. Initial side effects settled after 3 weeks. Inflammation score improved slowly.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;">
+              <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:11px;height:11px;border-radius:50%;background:#f48fb1;margin-top:4px;flex-shrink:0;"></div><div style="width:2px;flex:1;background:#86a78828;min-height:34px;"></div></div>
+              <div style="padding-bottom:18px;"><div style="font-size:10px;font-weight:900;color:#adc2ae;letter-spacing:0.08em;">JUNE 2023</div><div style="font-size:13px;font-weight:700;color:#3a4a3b;margin-top:2px;">Joined Sage 🌿</div><div style="font-size:12px;color:#7a9e7e;margin-top:3px;line-height:1.5;">Found the community and started the inflammation diary. Finally started seeing patterns in triggers.</div></div>
+            </div>
+            <div style="display:flex;gap:14px;">
+              <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:11px;height:11px;border-radius:50%;background:#86a788;margin-top:4px;flex-shrink:0;"></div></div>
+              <div><div style="font-size:10px;font-weight:900;color:#adc2ae;letter-spacing:0.08em;">TODAY</div><div style="font-size:13px;font-weight:700;color:#3a4a3b;margin-top:2px;">Still on the journey 💚</div><div style="font-size:12px;color:#7a9e7e;margin-top:3px;line-height:1.5;">Inflammation score down 12 pts this week. Learning, growing, one day at a time.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-overlay" id="edit-profile-modal">
+  <div class="modal" style="max-width:480px;">
+    <h3>Edit Profile ✏️</h3>
+    <p>Username and city are visible to other Cysters. Everything else stays private to you only.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div><label class="form-label">Username <span class="public-badge" style="font-size:9px;">🔓 Public</span></label><input class="form-input" type="text" value="Ananya Krishnan" id="edit-username"/></div>
+      <div><label class="form-label">City <span class="public-badge" style="font-size:9px;">🔓 Public</span></label><input class="form-input" type="text" value="Kochi, Kerala" id="edit-city"/></div>
+      <div><label class="form-label">PCOS Type <span class="public-badge" style="font-size:9px;">🔓 Public</span></label>
+        <select class="form-input" id="edit-pcos-type">
+          <option selected>Insulin-resistant PCOS</option><option>Inflammatory PCOS</option>
+          <option>Adrenal PCOS</option><option>Post-pill PCOS</option><option>Not sure yet</option>
+        </select>
+      </div>
+      <div><label class="form-label">Journey Stage <span class="public-badge" style="font-size:9px;">🔓 Public</span></label>
+        <select class="form-input" id="edit-journey">
+          <option selected>Early — figuring things out</option>
+          <option>Managing — finding my rhythm</option><option>Thriving — paying it forward</option>
+        </select>
+      </div>
+    </div>
+    <div class="privacy-note" style="margin-bottom:16px;"><span style="font-size:15px;">🔒</span><span>All health details (DOB, medications, cycle info, notes) are <strong>never shared</strong> with anyone.</span></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('edit-profile-modal').classList.remove('open')">Cancel</button>
+      <button class="modal-confirm" onclick="saveProfile()">Save Changes 🌿</button>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE STORY MODAL -->
+<div class="modal-overlay" id="write-modal">
+  <div class="modal">
+    <h3>Share your story 💚</h3>
+    <p>Your words might be exactly what another Cyster needs to read today. You can stay anonymous.</p>
+    <select class="form-input" style="margin-bottom:12px;">
+      <option>🆕 Newly Diagnosed</option>
+      <option>😤 Doctor Dismissed Me</option>
+      <option>💇 Hair Loss</option>
+      <option>✨ Small Win</option>
+      <option>💔 Hard Day</option>
+      <option>🎉 Success Story</option>
+      <option>🧠 Mental Health</option>
+      <option>💊 Medication Experience</option>
+    </select>
+    <textarea class="form-input" rows="4" placeholder="Write your story here..." style="margin-bottom:16px;"></textarea>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+      <input type="checkbox" id="anon-check" checked/>
+      <label for="anon-check" style="font-size:13px;color:#5a7d5c;font-weight:700;">Post anonymously</label>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('write-modal').classList.remove('open')">Cancel</button>
+      <button class="modal-confirm" onclick="document.getElementById('write-modal').classList.remove('open')">Post Story 🌿</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── NAVIGATION ──
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn-link, .sidebar-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-btn-link, .sidebar-link').forEach(l => {
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes("'" + page + "'")) {
+      l.classList.add('active');
+    }
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── GREETING ──
+const h = new Date().getHours();
+const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+document.getElementById('greeting').textContent = g + ', Ananya 🌿';
+
+// ── AFFIRMATIONS ──
+const AFFS = [
+  { text: '"Your body is doing its best, and so are you. Healing isn\'t linear — and that\'s okay."', tag: '🌷 TODAY\'S AFFIRMATION', author: '— For the hard days', bg: 'linear-gradient(135deg,#86a788,#9ab89c 50%,#c8a8b8)' },
+  { text: '"Every small step toward understanding yourself matters more than you know."', tag: '🌿 FOR THE QUIET WINS', author: '— For the gentle days', bg: 'linear-gradient(135deg,#c4607a,#d4849a 50%,#86a788)' },
+  { text: '"You are not your diagnosis. You are whole, worthy, and so much more."', tag: '💜 FOR THE TOUGH MOMENTS', author: '— Always', bg: 'linear-gradient(135deg,#7a5aa8,#9a7ac8 50%,#86a788)' },
+  { text: '"Rest is not giving up — it\'s how you come back stronger. Be gentle today."', tag: '🌸 FOR WHEN YOU\'RE TIRED', author: '— Rest is healing', bg: 'linear-gradient(135deg,#c4847a,#d4a498 50%,#a8c5aa)' },
+];
+let affIdx = 0;
+function newAff() {
+  affIdx = (affIdx + 1) % AFFS.length;
+  const card = document.getElementById('aff-card');
+  card.style.opacity = '0';
+  card.style.transition = 'opacity 0.25s';
+  setTimeout(() => {
+    document.getElementById('aff-text').textContent = AFFS[affIdx].text;
+    card.style.background = AFFS[affIdx].bg;
+    card.style.opacity = '1';
+  }, 250);
+}
+
+// ── AI CHAT ──
+const responses = {
+  default: [
+    { strong: 'What you\'re describing sounds like an inflammatory flare', body: ' — really common with PCOS and genuinely uncomfortable. When inflammation spikes, it triggers androgen production which can affect your skin, sleep, and energy all at once. Here\'s what tends to actually help:\n\n• Anti-inflammatory foods: turmeric, leafy greens, berries, omega-3s\n• Prioritise sleep — even 30 more minutes makes a real difference\n• Gentle movement like walking or yoga over intense workouts during flares\n• Spearmint tea has shown promise in reducing androgens' },
+    { strong: 'This is something many Cysters experience', body: ', and it\'s completely valid. PCOS affects your hormones, which affects literally everything — your mood, your skin, your sleep, your metabolism. The good news is that small, consistent changes can make a real difference. Let me know more about what you\'re feeling and I\'ll give you more specific guidance.' },
+  ]
+};
+let isLoading = false;
+function fillPrompt(text) {
+  document.getElementById('ai-input').value = text;
+  document.getElementById('ai-input').focus();
+}
+function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const box = document.getElementById('chat-box');
+
+  // user bubble
+  const userDiv = document.createElement('div');
+  userDiv.style.display = 'flex'; userDiv.style.justifyContent = 'flex-end';
+  userDiv.innerHTML = `<div class="bubble-user">${text}</div>`;
+  box.appendChild(userDiv);
+  input.value = '';
+  box.scrollTop = box.scrollHeight;
+
+  // loading
+  isLoading = true;
+  const loadDiv = document.createElement('div');
+  loadDiv.innerHTML = `<div class="sage-label">SAGE AI</div><div class="bubble-sage"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(loadDiv);
+  box.scrollTop = box.scrollHeight;
+
+  setTimeout(() => {
+    box.removeChild(loadDiv);
+    const r = responses.default[Math.floor(Math.random() * responses.default.length)];
+    const replyDiv = document.createElement('div');
+    replyDiv.innerHTML = `<div class="sage-label">SAGE AI</div><div class="bubble-sage"><strong>${r.strong}</strong>${r.body.replace(/\n/g,'<br/>')}<br/><br/><em style="font-size:12px;color:#adc2ae;">This is not a medical diagnosis. If symptoms are severe or persistent, please see a doctor. 💚</em></div>`;
+    box.appendChild(replyDiv);
+    box.scrollTop = box.scrollHeight;
+    isLoading = false;
+  }, 2000);
+}
+document.getElementById('ai-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ── DIARY ──
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+function updateSlider(type) {
+  const val = document.getElementById(type + '-slider').value;
+  document.getElementById(type + '-val').textContent = val + '/10';
+}
+function submitLog() {
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = '✓ Logged! Great job today 🌿';
+  btn.style.background = 'linear-gradient(135deg,#66bb6a,#81c784)';
+  setTimeout(() => {
+    btn.textContent = 'Save Today\'s Log 🌿';
+    btn.style.background = '';
+  }, 2500);
+}
+
+// calendar
+const calColors = ['#c8e6c9','#c8e6c9','#ffe082','#c8e6c9','#ffab91','#c8e6c9','#c8e6c9','#ffe082','#c8e6c9','#c8e6c9','#ffab91','#c8e6c9','#ffe082','#c8e6c9','#c8e6c9','#c8e6c9','#ffab91','#c8e6c9','#ffe082','#c8e6c9','#c8e6c9'];
+const calText = ['#2e7d32','#2e7d32','#f57f17','#2e7d32','#bf360c','#2e7d32','#2e7d32','#f57f17','#2e7d32','#2e7d32','#bf360c','#2e7d32','#f57f17','#2e7d32','#2e7d32','#2e7d32','#bf360c','#2e7d32','#f57f17','#2e7d32','#2e7d32'];
+const grid = document.getElementById('cal-grid');
+for (let i = 0; i < 28; i++) {
+  const d = document.createElement('div');
+  d.className = 'cal-day';
+  d.style.background = i < 21 ? calColors[i] : '#f5f5f5';
+  d.style.color = i < 21 ? calText[i] : '#ccc';
+  d.textContent = i + 1;
+  grid.appendChild(d);
+}
+
+// ── STORY WALL ──
+function filterTag(el) {
+  document.querySelectorAll('.tag-pill').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function helpedClick(btn) {
+  const countEl = btn.querySelector('span');
+  const count = parseInt(countEl.textContent);
+  countEl.textContent = count + 1;
+  btn.style.background = '#86a788';
+  btn.style.color = '#fff';
+  btn.style.borderColor = '#86a788';
+}
+
+// ── CONNECT ──
+function waveClick(btn) {
+  if (btn.classList.contains('waved')) return;
+  btn.classList.add('waved');
+  btn.textContent = '🌊 Wave sent!';
+}
+
+// ── EVENTS ──
+function rsvpClick(btn) {
+  if (btn.classList.contains('done')) return;
+  btn.classList.remove('go');
+  btn.classList.add('done');
+  btn.textContent = '✓ RSVP\'d!';
+  const countEl = btn.parentElement.querySelector('span');
+  if (countEl) {
+    const n = parseInt(countEl.textContent);
+    countEl.textContent = (n + 1) + ' attending';
+  }
+}
+// ── PROFILE ──
+function saveProfile() {
+  const username = document.getElementById('edit-username').value;
+  const city = document.getElementById('edit-city').value;
+  const pcosType = document.getElementById('edit-pcos-type').value;
+  const journey = document.getElementById('edit-journey').value;
+  document.getElementById('field-username').textContent = username;
+  document.getElementById('field-city').textContent = city;
+  document.getElementById('field-pcos-type').textContent = pcosType;
+  document.getElementById('field-journey').textContent = journey;
+  document.getElementById('prof-name').textContent = username;
+  document.getElementById('prof-city').textContent = '📍 ' + city;
+  document.getElementById('edit-profile-modal').classList.remove('open');
+}
+</script>
+</body>
+</html>
