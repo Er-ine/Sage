@@ -15,6 +15,9 @@
 * Member 2: Gayathry S - MITS
 
 **Hosted Project Link:** 
+
+https://sage-website-pcos.onrender.com/
+https://sage-chi-dun.vercel.app/
 ---
 
 ## Project Description
