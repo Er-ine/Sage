@@ -1,41 +1,152 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
 
-First, run the development server:
+# Sage 🌿
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+"Where PCOS makes sense."
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Basic Details
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Team Name:** InnovateHer
+**Team Members:**
 
-## Learn More
+  * Member 1: Erine Anna Binu - MITS
+* Member 2: Gayathry S - MITS
 
-To learn more about Next.js, take a look at the following resources:
+**Hosted Project Link:** 
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Description
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Sage is a web-based health and community platform built exclusively for women living with PCOS. It combines personalized health guidance with a safe community, helping women understand their body, track symptoms, and connect with others.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## The Problem
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# Sage
-Sage is a dedicated PCOS health and community platform that turns confusion into clarity. Through simple, human explanations and personalized tracking insights, it helps women understand their bodies while connecting them with others who genuinely share their experience.
->>>>>>> 5efc5d614d28b1b9c3939906ff44aaa793d4a48f
+* PCOS affects 1 in 10 women worldwide.
+* Diagnosis often takes 7-10 years due to dismissed symptoms.
+* Generic online advice is confusing and contradictory.
+* Women feel alone and unheard.
+* Existing apps do not combine tracking with community support.
+
+---
+
+## The Solution
+
+Sage provides:
+
+* Personalized symptom explanations using Groq/Sanity RAG queries
+* Inflammation diary with personalized scores
+* Community Story Wall
+* Matching with similar users
+* Event board with PCOS-focused events
+
+---
+
+## Technical Details
+
+Frontend: Next.js, Tailwind CSS
+Backend: Next.js API routes
+Database: Firebase (Firestore + Auth)
+AI/RAG: Groq/Sanity
+Charts: Recharts
+Deployment: Vercel
+
+**Libraries/Tools Used:**
+
+* @sanity/client (groq api )
+* Firebase SDK
+* Next.js, React
+* Recharts
+
+---
+
+## Features
+
+* AI Symptom Explainer (via Groq/Sanity)
+* Inflammation Diary with daily logs and scores
+* Connect with Cysters (matching users with similar profiles)
+* Story Wall (user-generated posts and experiences)
+* Events Board (PCOS-focused events, webinars, workshops)
+
+---
+
+## Implementation
+
+### Software Installation
+
+1. Clone the repo
+2. Run `npm install`
+3. Set environment variables in `.env.local` (Firebase and Sanity keys)
+4. Run `npm run dev`
+
+---
+
+## Project Documentation
+
+### Screenshots
+
+<img width="1847" height="920" alt="image (5)" src="https://github.com/user-attachments/assets/35d6db05-e188-4cbe-a4d8-f8fe31b272a9" />
+
+<img width="1852" height="922" alt="image (4)" src="https://github.com/user-attachments/assets/7d65d3cd-b1bd-47ae-80f6-da3bafc984f4" />
+
+<img width="1846" height="910" alt="image (3)" src="https://github.com/user-attachments/assets/2dd92c5e-02f6-4043-9740-013ed5aac472" />
+
+<img width="1854" height="876" alt="image (2)" src="https://github.com/user-attachments/assets/59f3e039-b530-43e7-890e-65645e11b7b1" />
+
+<img width="1840" height="895" alt="image (1)" src="https://github.com/user-attachments/assets/267af975-93ec-4868-95f8-4f17c3e51ba9" />
+
+
+### System Architecture
+
+* Frontend sends API requests to Next.js backend
+* Backend queries Firebase and Groq/Sanity dataset
+* Groq/Sanity returns dataset-driven answers for symptoms, matching, and events
+* Responses displayed in UI
+
+---
+
+## API Documentation
+
+**Base URL:** [http://localhost:3000/api](http://localhost:3000/api)
+
+**POST /api/ai-explainer**
+
+* Request Body: `{ "question": "PCOS and fertility"
+ }`
+* Response: `{ "answer": "PCOS can affect ovulation, making it harder to get pregnant, but with treatment and lifestyle changes, many women can conceive....[dataset-guided" }`
+
+**POST /api/inflammation**
+
+* Request Body: `{ "question": "inflammation" }`
+* Response: `{ "answer": "Inflammation is the body’s response to injury or infection... [dataset-guided]" }`
+
+**POST /api/matching**
+
+* Request Body: `{ "question": "matching" }`
+* Response: `{ "answer": "Matching helps pair users with the right support... [dataset-guided]" }`
+
+**POST /api/events**
+
+* Request Body: `{ "question": "event" }`
+* Response: `{ "answer": "Upcoming events are posted monthly on our site... [dataset-guided]" }`
+
+---
+
+## AI Tools Used
+
+* Groq/Sanity RAG backend for querying PCOS content dataset
+* Human contributions: dataset curation, UI design, backend integration
+
+---
+
+## Team Contributions
+
+* Member 1: Frontend development, UI/UX design
+* Member 2: Backend, API integration, Groq dataset curation
+
+---
+
+
