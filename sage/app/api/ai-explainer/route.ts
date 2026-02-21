@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../lib/firebase"; // Admin SDK db
+import { db } from "../../../lib/firebase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,8 +15,7 @@ export async function POST(req: NextRequest) {
 
     if (snapshot.empty) {
       return NextResponse.json({ answer: "No answers found in the database." });
-    }gi
-
+    }
     const lowerQuestion = question.toLowerCase();
 
     const doc = snapshot.docs.find(d => {
